@@ -23,7 +23,7 @@ public class Intake{
         leftMotor = new Spark( 0);
         rightMotor = new Spark( 1);
         sensor = new DigitalInput(3);
-        elbowMotor = new Spark(8);
+        elbowMotor = new Spark(2);
     }
     //init stuff
     public void update() {
@@ -55,7 +55,7 @@ public class Intake{
             leftMotorCmd = 0;
             rightMotorCmd = 0;
         }
-        System.out.println(Abutton);
+        // System.out.println(Abutton);
         leftMotor.set(leftMotorCmd);
         rightMotor.set(-1*rightMotorCmd);
 
