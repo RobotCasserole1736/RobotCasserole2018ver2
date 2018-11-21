@@ -1,5 +1,6 @@
 package frc.robot;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.Encoder;
 
 public class Elevator {
     int channel = 0;
