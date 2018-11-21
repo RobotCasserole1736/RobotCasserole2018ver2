@@ -10,6 +10,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.DriveTrain;
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -23,6 +25,7 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   Intake intk;
+  DriveTrain DT;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -34,6 +37,7 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
     intk= new Intake();
+    DT = new DriveTrain();
   }
 
   /**
@@ -46,6 +50,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    DT.update();
   }
 
   /**
