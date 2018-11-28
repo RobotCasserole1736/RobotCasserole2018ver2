@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID;
 
 public class DriveTrain {
+	private static DriveTrain  dTrain = null;
 
    XboxController driverController;
    double Direction = 0;
@@ -18,6 +19,11 @@ public class DriveTrain {
    Spark L2;
    Spark L3;
 
+   public static synchronized DriveTrain getInstance() {
+		if ( dTrain == null)
+         dTrain = new DriveTrain();
+		return dTrain;
+	}
    public DriveTrain() {
 
       R1 = new Spark(4);
@@ -48,6 +54,16 @@ public class DriveTrain {
       return deadZone(joyVal);
    }
 
+   public void setMotorCMD(double command){
+      R1.set(-1*command);
+      R2.set(-1*command);
+      R3.set(-1*command);
+      L1.set(command);
+      L2.set(command);
+      L3.set(command);
+   }
+
+
    // Do init (one time-stuff) here
 
    public void update() {
@@ -70,5 +86,10 @@ public class DriveTrain {
       L2.set(motorSpeedLeftCMD);
       L3.set(motorSpeedLeftCMD);
 
+      
+
+      
    }
+
+   
 }
