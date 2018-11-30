@@ -24,7 +24,7 @@ public class DriveTrain {
          dTrain = new DriveTrain();
 		return dTrain;
 	}
-   public DriveTrain() {
+   private DriveTrain() {
 
       R1 = new Spark(4);
       R2 = new Spark(5);
@@ -61,6 +61,7 @@ public class DriveTrain {
       L1.set(command);
       L2.set(command);
       L3.set(command);
+      System.out.println("command:" + Double.toString(command));
    }
 
 
@@ -77,7 +78,7 @@ public class DriveTrain {
       TurnCMD = getTurnCMD();
        
       motorSpeedLeftCMD = DirectionCMD - TurnCMD;
-      motorSpeedRightCMD = -1 * DirectionCMD + TurnCMD;
+      motorSpeedRightCMD = -1 * (DirectionCMD + TurnCMD);
       
       R1.set(motorSpeedRightCMD);
       R2.set(motorSpeedRightCMD);

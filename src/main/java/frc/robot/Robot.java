@@ -24,7 +24,6 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   Intake intk;
-  DriveTrain DT;
   Autonomous auto;
 
   /**
@@ -37,7 +36,6 @@ public class Robot extends TimedRobot {
     m_chooser.addObject("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
     intk= new Intake();
-    DT = new DriveTrain();
   }
 
   /**
@@ -50,7 +48,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    DT.update();
+    DriveTrain.getInstance().update();
   }
 
   /**
@@ -74,6 +72,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    System.out.println("It works too");
     auto.update();
   }
 
