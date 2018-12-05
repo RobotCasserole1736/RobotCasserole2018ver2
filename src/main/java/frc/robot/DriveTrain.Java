@@ -36,22 +36,16 @@ public class DriveTrain {
       driverController = new XboxController(0);
    }
    // Constructor
-   public double deadZone(double in){
-      if (in < 0.1 && in > -0.1) {
-         return 0;
-      } else {
-         return in;
-      }
-   }
+   
    public double getDirectionCMD() {
-      double joyVal = driverController.getY(GenericHID.Hand.kLeft);
-      return deadZone(joyVal);
+      double joyVal = Math.pow(driverController.getY(GenericHID.Hand.kLeft),3);
+      return joyVal;
 
    }
 
    public double getTurnCMD() {
-      double joyVal = driverController.getX(GenericHID.Hand.kRight);
-      return deadZone(joyVal);
+      double joyVal = Math.pow(driverController.getX(GenericHID.Hand.kRight),3);
+      return joyVal;
    }
 
    public void setMotorCMD(double command){
