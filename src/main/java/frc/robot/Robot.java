@@ -7,10 +7,18 @@
 
 package frc.robot;
 
+import org.usfirst.frc.team1736.lib.Calibration.CalWrangler;
+import org.usfirst.frc.team1736.lib.DataServer.CasseroleDataServer;
+import org.usfirst.frc.team1736.lib.DataServer.Signal;
+import org.usfirst.frc.team1736.lib.WebServer.CasseroleWebServer;
+
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.DriveTrain;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -20,11 +28,16 @@ import frc.robot.DriveTrain;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
   Intake intk;
   Autonomous auto;
+
+  PowerDistributionPanel pdp;
+
+  Signal robotCurrentDraw;
+
+  CasseroleWebServer webserver = new CasseroleWebServer();
+  CalWrangler wrangler = new CalWrangler();
 
   /**
    * This function is run when the robot is first started up and should be
@@ -32,10 +45,16 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_chooser.addDefault("Default Auto", kDefaultAuto);
-    m_chooser.addObject("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+
+    DriveTrain.getInstance(); //Ensure it gets init'ed once
     intk= new Intake();
+
+    pdp = new PowerDistributionPanel();
+
+    robotCurrentDraw = new Signal("Total Current", "A");
+
+    webserver.startServer();
+    CasseroleDataServer.getInstance().startServer();
   }
 
   /**
@@ -48,7 +67,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    double loop_time = Timer.getFPGATimestamp();
+
     DriveTrain.getInstance().update();
+
+    robotCurrentDraw.addSample(loop_time, pdp.getTotalCurrent());
   }
 
   /**
