@@ -10,7 +10,7 @@ public class Autonomous {
     }
 
     public void update(){
-      if(Timer.getFPGATimestamp() - startTime < 10){
+      if(Timer.getFPGATimestamp() - startTime < 2){
         DriveTrain.getInstance().setMotorCMD(1);
         System.out.println("Motor on");
       } 
