@@ -46,11 +46,11 @@ public class Intake{
         boolean Abutton = xboxCont.getAButton();
         boolean Bbutton = xboxCont.getBButton();
         if(Abutton){
-            leftMotorCmd = 1.0;
-            rightMotorCmd = 1.0;
+            leftMotorCmd = .75;
+            rightMotorCmd = .75;
         } else if(Bbutton){
-            leftMotorCmd = -1.0;
-            rightMotorCmd = -1.0;
+            leftMotorCmd = -.75;
+            rightMotorCmd = -.75;
         } else{
             leftMotorCmd = 0;
             rightMotorCmd = 0;
