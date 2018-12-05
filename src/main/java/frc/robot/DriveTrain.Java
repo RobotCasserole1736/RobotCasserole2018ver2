@@ -77,9 +77,17 @@ public class DriveTrain {
       DirectionCMD = getDirectionCMD();
       TurnCMD = getTurnCMD();
        
+      if(Math.abs(DirectionCMD) < 0.15){
+         DirectionCMD = 0;
+      }
+
+      if(Math.abs(TurnCMD) < 0.15){
+         TurnCMD = 0;
+      }
+
       motorSpeedLeftCMD = DirectionCMD - TurnCMD;
       motorSpeedRightCMD = -1 * (DirectionCMD + TurnCMD);
-      
+
       R1.set(motorSpeedRightCMD);
       R2.set(motorSpeedRightCMD);
       R3.set(motorSpeedRightCMD);
