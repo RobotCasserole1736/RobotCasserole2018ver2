@@ -1,12 +1,57 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Plugins/Imports/Repository definitions
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Required for creating version info
+import java.text.SimpleDateFormat
+import org.ajoberstar.grgit.Grgit
+import java.net.InetAddress
+
+
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2019.0.0-alpha-3"
+    id "org.ajoberstar.grgit" version "2.0.0"
+}
+
+//Define the 
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
 
 def ROBOT_CLASS = "frc.robot.Robot"
+def BUILD_INFO_FILE = "$projectDir/buildinfo.txt"
 
-// Define my targets (RoboRIO) and artifacts (deployable files)
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Dependency definitions
+/////////////////////////////////////////////////////////////////////////////////
+dependencies {
+    //FRC library dependencies
+    compile wpilib()
+    compile ctre()
+    compile navx()
+
+    //Casserole WebServer Deps
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile group: 'org.eclipse.jetty', name: 'jetty-http', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-util', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-security', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-server', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-client', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-servlet', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-api', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-common', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-io', version: '9.3.9.v20160517'
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Define all the targets (for now just RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project EmbeddedTools.
+/////////////////////////////////////////////////////////////////////////////////
 deploy {
     targets {
         target("roborio", edu.wpi.first.gradlerio.frc.RoboRIO) {
@@ -18,21 +63,33 @@ deploy {
         }
     }
     artifacts {
+    
+        //Main roboRIO Java .jar artifact
         artifact('frcJava', edu.wpi.first.gradlerio.frc.FRCJavaArtifact) {
             targets << "roborio"
             // Debug can be overridden by command line, for use with VSCode
             debug = getDebugOrDefault(false)
         }
+        
+        // Casserole WebServer support Files Deploy
+        fileTreeArtifact('CasseroleWebServerFileDeploy') {
+            targets << "roborio"                   // Web server should deploy to RIO
+            files = fileTree(dir: './resources')   // Dev PC location for files
+            directory = '/home/lvuser/resources/'  // RoboRIO location to deploy to
+        }
+
+        //Build info file deploy 
+        //fileArtifact('BuildInfoDeploy') {
+        //    targets << "roborio"                  // build info should deploy to RIO 
+        //    file = file(BUILD_INFO_FILE)          // Dev PC location for file
+        //    directory = '/home/lvuser/resources/' // RoboRIO location to deploy to
+        //}
     }
 }
 
-// Defining my dependencies. In this case, WPILib (+ friends), CTRE Toolsuite (Talon SRX)
-// and NavX.
-dependencies {
-    compile wpilib()
-    compile ctre()
-    compile navx()
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Java build configuration
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
@@ -52,3 +109,100 @@ compileJava {
 wrapper {
     gradleVersion = '4.9'
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Javadoc generation
+///////////////////////////////////////////////////////////////////////////////////////////////////
+task genDoc(type: Javadoc) {
+  source = sourceSets.main.allJava
+  destinationDir = reporting.file("$projectDir/docs") //to align with github pages settings
+  title = "FRC Team 1736 Robot Casserole 2019 Robot Documentation/."
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Build Meta-data file generation
+///////////////////////////////////////////////////////////////////////////////////////////////////
+task genMetaData(){
+    doLast{
+        String filecontents = ""
+        String build_uname = ""
+        String build_host = ""
+        String build_time = ""
+        String git_sha1 = ""
+        String git_branch = ""
+        String git_wd_clean = ""
+        String git_tag_list = ""
+
+        //Get the user's name. Shouldn't throw errors, just "null" if 
+        // it can't figure out who you are.
+        build_uname = System.getProperty("user.name")
+
+        //Get the closest thing to PC name we can find in Groovy, the
+        // local machine's Hostname. This could definietly throw exceptions
+        // if you've got a weird system or something.
+        try{
+            build_host = InetAddress.getLocalHost().getHostName()
+        } catch (all) {
+            build_host = "unknown"
+        }
+
+        //Build time in totally-not-ISO format
+        build_time = new SimpleDateFormat("MM-dd-yyyy hh:mm:ssa").format(new Date())
+
+        // Get currently checked-out SHA1
+        try{
+            git_sha1 = Grgit.open(dir:'.').head().id
+        } catch (all) {
+            git_sha1 = "unknown"
+        }
+
+        // Get currently checked-out branch friendly name
+        try{
+            git_branch = Grgit.open(dir:'.').branch.current().name
+        } catch (all) {
+            git_branch = "unknown"
+        }
+
+        // Get friendly names of the tags on this commit (if any)
+        try{
+            def repo = Grgit.open(dir:'.')
+            def head = repo.head()
+            def tag_list = repo.tag.list().findAll{it.commit == head}
+            if(tag_list.size() > 0){
+                for(tag_obj in tag_list){
+                    git_tag_list += tag_obj.getName()+","
+                }
+                
+            } else {
+                git_tag_list = "none"
+            }
+
+        } catch (Exception e) {
+            System.out.println(e)
+            git_tag_list = "unknown"
+        }
+
+        // Get clean/dirty status of working directory
+        try{
+            git_wd_clean = Grgit.open(dir:'.').status().isClean()
+        } catch (all) {
+            git_wd_clean = "unknown"
+        }
+
+        // Build file contents and write to disk
+        filecontents += "build_uname: ${build_uname}\n"
+        filecontents += "build_host: ${build_host}\n"
+        filecontents += "build_time: ${build_time}\n"
+        filecontents += "git_tag_list: ${git_tag_list}\n"
+        filecontents += "git_branch: ${git_branch}\n"
+        filecontents += "git_sha1: ${git_sha1}\n"
+        filecontents += "git_wd_clean: ${git_wd_clean}\n"
+
+        new File(BUILD_INFO_FILE).text = filecontents
+    }
+}
+
+// Add the file generation task to the standard build
+build.dependsOn genMetaData
