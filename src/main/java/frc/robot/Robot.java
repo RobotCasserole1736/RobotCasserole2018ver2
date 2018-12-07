@@ -67,11 +67,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    double loop_time = Timer.getFPGATimestamp();
+    double loop_time_ms = Timer.getFPGATimestamp()*1000.0;
 
     DriveTrain.getInstance().update();
 
-    robotCurrentDraw.addSample(loop_time, pdp.getTotalCurrent());
+    robotCurrentDraw.addSample(loop_time_ms, pdp.getTotalCurrent());
   }
 
   /**

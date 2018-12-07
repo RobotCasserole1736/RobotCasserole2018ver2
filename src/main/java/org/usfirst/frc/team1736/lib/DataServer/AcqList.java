@@ -1,8 +1,8 @@
 package org.usfirst.frc.team1736.lib.DataServer;
 
 import java.util.HashSet;
-import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Timer;
 
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.WriteCallback;
@@ -100,7 +100,7 @@ public class AcqList {
      */
     private class dataAcqTask extends TimerTask implements WriteCallback {
         public void run() {
-            client.sendString(getData(System.currentTimeMillis()).toJSONString(), this);
+            client.sendString(getData(edu.wpi.first.wpilibj.Timer.getFPGATimestamp()*1000.0).toJSONString(), this);
         }
 
         @Override
