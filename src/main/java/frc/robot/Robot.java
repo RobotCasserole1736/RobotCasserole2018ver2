@@ -15,8 +15,6 @@ import org.usfirst.frc.team1736.lib.WebServer.CasseroleWebServer;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.DriveTrain;
 
 
@@ -57,16 +55,8 @@ public class Robot extends TimedRobot {
     CasseroleDataServer.getInstance().startServer();
   }
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
-   */
   @Override
-  public void robotPeriodic() {
+  public void disabledPeriodic() {
     double loop_time_ms = Timer.getFPGATimestamp()*1000.0;
 
     DriveTrain.getInstance().update();
@@ -95,8 +85,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    System.out.println("It works too");
+    double loop_time_ms = Timer.getFPGATimestamp()*1000.0;
+
     auto.update();
+
+    robotCurrentDraw.addSample(loop_time_ms, pdp.getTotalCurrent());
   }
 
   /**
@@ -104,7 +97,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    double loop_time_ms = Timer.getFPGATimestamp()*1000.0;
+    
     intk.update();
+    DriveTrain.getInstance().update();
+
+    robotCurrentDraw.addSample(loop_time_ms, pdp.getTotalCurrent());
   }
 
   /**
