@@ -33,7 +33,7 @@ public class Elevator {
         eleMotor = new VictorSP(channel);
         //TODO:Update Encoder Number/channels
         eleEncoder = new Encoder(1,2);
-        eleEncoder.setDistancePerPulse(ELEV_HEIGHT_IN_PER_WINCH_REV);
+        eleEncoder.setDistancePerPulse(ELEV_HEIGHT_IN_PER_WINCH_REV * ELEV_ENC_PULSES_PER_REV);
         lowerLimit = new DigitalInput(3);
         upperLimit = new DigitalInput(4);
     }
@@ -48,6 +48,12 @@ public class Elevator {
             }
         }
 
+    }
+    public void updateActualHeight() {
+        if(lowerLimitReach) {
+            eleEncoder.reset(); 
+        }
+        currentHeightInches = eleEncoder.getDistance();
     }
 
     public void setElevatorDesiredLevel(int level) {
@@ -70,5 +76,6 @@ public class Elevator {
         updateDesiredHeightInches();
         lowerLimitReach = lowerLimit.get();
         upperLimitReach = upperLimit.get();
+        updateActualHeight();
     }
 }
