@@ -83,6 +83,9 @@ public class Robot extends TimedRobot {
     /* Init Vision Processing */
     visionProc = new JeVoisInterface(true);
 
+    /* Init software utilities */
+    loadMon= new CasseroleRIOLoadMonitor();
+
     /* Init telemetry */
     robotCurrentDraw = new Signal("Total Current", "A");
     visionTargetXPos = new Signal("Vision Target X Pos", "norm");     
@@ -101,7 +104,7 @@ public class Robot extends TimedRobot {
     CasseroleDriverView.newBoolean("Vision System Offline", "red");
     CasseroleDriverView.newBoolean("Vision Target Detected", "green");
     CasseroleDriverView.newDial("Target Angle", -50, 50, 10, -5, 5);
-    CasseroleDriverView.newWebcam("Vision Proc Cam", "10.17.36.2:1180/stream.mjpg", 50, 50, 0);
+    CasseroleDriverView.newWebcam("Vision Proc Cam", "http://10.17.36.2:1180/stream.mjpg", 50, 50, 0);
 
 
 
@@ -207,12 +210,13 @@ public class Robot extends TimedRobot {
     visionJeVoisCPUTemp.addSample(sample_time_ms,visionProc.getJeVoisCPUTemp_C());
     rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
     rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
+    driverViewUpdate();
   }
 
   public void driverViewUpdate(){
     CasseroleDriverView.setBoolean("Vision System Offline", !visionProc.isVisionOnline());
     CasseroleDriverView.setBoolean("Vision Target Detected", visionProc.isTgtVisible());
-    CasseroleDriverView.setDialValue("Target Angle", visionProc.getTgtXPos());
+    CasseroleDriverView.setDialValue("Target Angle", (visionProc.getTgtXPos()-0.5)*100);
   }
 
 }

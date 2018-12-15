@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoSink;
+import edu.wpi.cscore.VideoSource;
 import edu.wpi.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
@@ -39,6 +41,7 @@ public class JeVoisInterface {
     // USBCam and server used for broadcasting a webstream of what is seen 
     private UsbCamera visionCam = null;
     private MjpegServer camServer = null;
+    private DummyVideoSink dummySink = null; //keeps vision alive even when no stream is requested.
     
     // Status variables 
     private boolean dataStreamRunning = false;
@@ -312,13 +315,13 @@ public class JeVoisInterface {
     private void startDataOnlyStream(){
         //Send serial commands to start the streaming of target info
         sendCmdAndCheck("setmapping " + Integer.toString(NO_STREAM_MAPPING));
-        sendCmdAndCheck("streamon");
+        //sendCmdAndCheck("streamon"); TODO - this command changed in the latest firmware
         dataStreamRunning = true;
     }
 
     private void stopDataOnlyStream(){
         //Send serial commands to stop the streaming of target info
-        sendCmdAndCheck("streamoff");
+        //sendCmdAndCheck("streamoff"); TODO: This command changed in latest firmware
         dataStreamRunning = false;
     }
     
@@ -330,9 +333,11 @@ public class JeVoisInterface {
         try{
             System.out.print("Starting JeVois Cam Stream...");
             visionCam = new UsbCamera("VisionProcCam", 0);
-            visionCam.setVideoMode(PixelFormat.kBGR, STREAM_WIDTH_PX, STREAM_HEIGHT_PX, STREAM_RATE_FPS);
+            visionCam.setVideoMode(PixelFormat.kYUYV, STREAM_WIDTH_PX, STREAM_HEIGHT_PX, STREAM_RATE_FPS);
             camServer = new MjpegServer("VisionCamServer", MJPG_STREAM_PORT);
             camServer.setSource(visionCam);
+            //dummySink = new DummyVideoSink();
+            //dummySink.setSource(visionCam);
             camStreamRunning = true;
             dataStreamRunning = true;
             System.out.println("SUCCESS!!");
