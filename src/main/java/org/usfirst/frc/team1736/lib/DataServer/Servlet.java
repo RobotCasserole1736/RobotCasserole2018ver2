@@ -30,7 +30,7 @@ class Servlet extends WebSocketServlet {
 
     @Override
     public void configure(WebSocketServletFactory factory) {
-        factory.getPolicy().setIdleTimeout(300000); 
+        factory.getPolicy().setIdleTimeout(9000000); //Uber big
         factory.register(Socket.class);
     }
 }
