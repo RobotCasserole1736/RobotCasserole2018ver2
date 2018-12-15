@@ -8,6 +8,7 @@ public class DriveTrain {
 	private static DriveTrain  dTrain = null;
 
    XboxController driverController;
+   JeVoisInterface visionProc;
    double Direction = 0;
    double Turn = 0;
    double motorSpeedLeft = 0;
@@ -43,8 +44,24 @@ public class DriveTrain {
 
    }
 
+   public void setVisionProc(JeVoisInterface in){
+      visionProc = in;
+   }
+
    public double getTurnCMD() {
       double joyVal = Math.pow(driverController.getX(GenericHID.Hand.kRight),3);
+
+      //hale auto-align to vision target
+      if(driverController.getBumper(GenericHID.Hand.kRight)){
+          
+          if(visionProc.isTgtVisible() && visionProc.isVisionOnline()){
+            joyVal = 0.75 * -1.0 * (visionProc.getTgtXPos() - 0.5); //Target X pos of 0.5
+          } else {
+            joyVal = 0;
+          }
+          
+      }
+
       return joyVal;
    }
 
