@@ -104,9 +104,11 @@ public class SignalFileLogger {
     public void startLoggingAuto(){
         fileLoggerStateLock.lock();
         try{
-            init("AUTO");
-            sampleQueue.clear();
-            loggingActive = true;
+            if(!loggingActive){
+                init("AUTO");
+                sampleQueue.clear();
+                loggingActive = true;
+            }
         } finally {
             fileLoggerStateLock.unlock();
         }
@@ -115,9 +117,11 @@ public class SignalFileLogger {
     public void startLoggingTeleop(){
         fileLoggerStateLock.lock();
         try{
-            init("TELEOP");
-            sampleQueue.clear();
-            loggingActive = true;
+            if(!loggingActive){
+                init("TELEOP");
+                sampleQueue.clear();
+                loggingActive = true;
+            }
         } finally {
             fileLoggerStateLock.unlock();
         }
@@ -126,9 +130,11 @@ public class SignalFileLogger {
     public void stopLogging(){
         fileLoggerStateLock.lock();
         try{
-            loggingActive = false;
-            forceSync();
-            close();
+            if(loggingActive){
+                loggingActive = false;
+                forceSync();
+                close();
+            }
         } finally {
             fileLoggerStateLock.unlock();
         }
@@ -139,7 +145,6 @@ public class SignalFileLogger {
         if(loggingActive){
             sampleQueue.add(samp_in);
         }
-
     }
 
     public int getSampleQueueLength(){
