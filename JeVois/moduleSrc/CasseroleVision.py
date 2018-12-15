@@ -37,8 +37,8 @@ class CasseroleVision:
 
         #Processing tune constants
         #TODO - Pick better constants
-        self.hsv_thres_lower = np.array([0,0,220])
-        self.hsv_thres_upper = np.array([255,255,255])
+        self.hsv_thres_lower = np.array([40,0,130])
+        self.hsv_thres_upper = np.array([120,255,255])
 
         #Target Information
         self.tgtAngle = "0.0"
@@ -100,9 +100,9 @@ class CasseroleVision:
         hsv_mask = cv2.inRange(hsv,self.hsv_thres_lower, self.hsv_thres_upper)
 
         # Erode image to remove noise if necessary.
-        hsv_mask = cv2.erode(hsv_mask, None, iterations = 3)
+        hsv_mask = cv2.erode(hsv_mask, None, iterations = 1)
         #Dilate image to fill in gaps
-        hsv_mask = cv2.dilate(hsv_mask, None, iterations = 3)
+        hsv_mask = cv2.dilate(hsv_mask, None, iterations = 1)
 
         #Find all countours of the outline of shapes in that mask
         contours,hierarchy  = cv2.findContours(hsv_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_TC89_KCOS)
@@ -167,16 +167,35 @@ class CasseroleVision:
             if(self.frame  % self.frame_dec_factor == 0):
                 #Generate a debug image of the input image, masking non-detected pixels
                 outimg = inimg
+                
 
                 #Overlay target info if found
                 if(self.tgtAvailable):
+
+                    #all target outlines
+                    for tgt in self.curTargets:
+                        top    = int(tgt.Y - tgt.height/2)
+                        bottom = int(tgt.Y + tgt.height/2)
+                        left   = int(tgt.X - tgt.width/2)
+                        right  = int(tgt.X + tgt.width/2)
+                        cv2.rectangle(outimg, (right,top),(left,bottom),(0,128,0), 1,cv2.LINE_4)
+                
+                    #Best target green box & centroid
                     top    = int(best_target.Y - best_target.height/2)
                     bottom = int(best_target.Y + best_target.height/2)
                     left   = int(best_target.X - best_target.width/2)
                     right  = int(best_target.X + best_target.width/2)
                     cv2.rectangle(outimg, (right,top),(left,bottom),(0,255,0), 2,cv2.LINE_4)
-                    cv2.circle(outimg, (best_target.X,best_target.Y),2,(0,0,255), -2,cv2.LINE_4)
+                    cv2.circle(outimg, (best_target.X,best_target.Y),3,(0,0,255), -2,cv2.LINE_4)
 
+                #Overlay HSV values of pixel 0,0  (top left) for test purposes
+                hsvpixel=hsv[0,0]
+                H_val = hsvpixel[0]
+                S_val = hsvpixel[1]
+                V_val = hsvpixel[2]
+                string = "H:{} S:{} V:{}".format(H_val,S_val,V_val);
+                cv2.putText(outimg, string, (3, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
+                
                 # We are done with the output, ready to send it to host over USB:
                 outframe.sendCvBGR(outimg)
 
